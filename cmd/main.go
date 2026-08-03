@@ -2,10 +2,8 @@ package main
 
 import (
 	"box-manager/cmd/api"
-	"box-manager/cmd/model"
 	"box-manager/cmd/store"
 	"fmt"
-	"time"
 )
 
 func main() {
@@ -19,6 +17,7 @@ func main() {
 
 }
 
+/* test variable
 func Foo() {
 
 	s := store.NewMemoryStore()
@@ -266,3 +265,4 @@ func examination() {
 	fmt.Println("\n=== ALL CHECKS PASSED ===")
 
 }
+*/
