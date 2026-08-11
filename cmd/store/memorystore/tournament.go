@@ -1,24 +1,25 @@
-package store
+package memorystore
 
 import (
 	"box-manager/cmd/model"
+	"context"
 	"fmt"
 )
 
-func (s *MemoryStore) CreateTournament(t model.Tournament) (model.Tournament, error) {
+func (s *MemoryStore) CreateTournament(ctx context.Context, t model.Tournament) (model.Tournament, error) {
 	t.ID = s.nextId
 	s.nextId++
 	s.tournaments[t.ID] = t
 	return t, nil
 }
-func (s *MemoryStore) GetTournament(id int) (model.Tournament, error) {
+func (s *MemoryStore) GetTournament(ctx context.Context, id int) (model.Tournament, error) {
 	tour, ok := s.tournaments[id]
 	if !ok {
 		return model.Tournament{}, fmt.Errorf("tournament with id %d not found", id)
 	}
 	return tour, nil
 }
-func (s *MemoryStore) UpdateTournament(id int, t model.Tournament) error {
+func (s *MemoryStore) UpdateTournament(ctx context.Context, id int, t model.Tournament) error {
 	_, ok := s.tournaments[id]
 	if !ok {
 		return fmt.Errorf("tournament with id %d not found", id)
@@ -27,7 +28,7 @@ func (s *MemoryStore) UpdateTournament(id int, t model.Tournament) error {
 	s.tournaments[id] = t
 	return nil
 }
-func (s *MemoryStore) DeleteTournament(id int) error {
+func (s *MemoryStore) DeleteTournament(ctx context.Context, id int) error {
 	_, ok := s.tournaments[id]
 	if !ok {
 		return fmt.Errorf("tournament with id %d not found", id)
@@ -35,14 +36,14 @@ func (s *MemoryStore) DeleteTournament(id int) error {
 	delete(s.tournaments, id)
 	return nil
 }
-func (s *MemoryStore) ListTournaments() []model.Tournament {
+func (s *MemoryStore) ListTournaments(ctx context.Context) []model.Tournament {
 	result := make([]model.Tournament, 0, len(s.tournaments))
 	for _, val := range s.tournaments {
 		result = append(result, val)
 	}
 	return result
 }
-func (s *MemoryStore) AddParticipantToTournament(tournamentID, fighterID, place int) error {
+func (s *MemoryStore) AddParticipantToTournament(ctx context.Context, tournamentID, fighterID, place int) error {
 	tour, ok := s.tournaments[tournamentID]
 	if !ok {
 		return fmt.Errorf("tournament with id %d not found", tournamentID)
@@ -63,7 +64,7 @@ func (s *MemoryStore) AddParticipantToTournament(tournamentID, fighterID, place 
 	s.tournaments[tournamentID] = tour
 	return nil
 }
-func (s *MemoryStore) RemoveParticipantFromTournament(tournamentID, fighterID int) error {
+func (s *MemoryStore) RemoveParticipantFromTournament(ctx context.Context, tournamentID, fighterID int) error {
 	tour, ok := s.tournaments[tournamentID]
 	if !ok {
 		return fmt.Errorf("tournament with id %d not found", tournamentID)

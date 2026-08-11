@@ -22,6 +22,7 @@ type Fighter struct {
 	BirthDate time.Time
 	Weight    float64
 	Category  string
+	ClubID    int
 }
 
 type Club struct {

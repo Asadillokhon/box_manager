@@ -1,17 +1,18 @@
-package store
+package memorystore
 
 import (
 	"box-manager/cmd/model"
+	"context"
 	"fmt"
 )
 
-func (s *MemoryStore) CreateFight(f model.Fight) (model.Fight, error) {
-	_, err := s.GetFighter(f.Fighter1ID)
+func (s *MemoryStore) CreateFight(ctx context.Context, f model.Fight) (model.Fight, error) {
+	_, err := s.GetFighter(ctx, f.Fighter1ID)
 	if err != nil {
 		return model.Fight{}, fmt.Errorf("fighter1: %w", err)
 
 	}
-	_, err = s.GetFighter(f.Fighter2ID)
+	_, err = s.GetFighter(ctx, f.Fighter2ID)
 	if err != nil {
 		return model.Fight{}, fmt.Errorf("fighter2: %w", err)
 	}
@@ -24,14 +25,14 @@ func (s *MemoryStore) CreateFight(f model.Fight) (model.Fight, error) {
 	s.fights[f.ID] = f
 	return f, nil
 }
-func (s *MemoryStore) GetFight(id int) (model.Fight, error) {
+func (s *MemoryStore) GetFight(ctx context.Context, id int) (model.Fight, error) {
 	figh, ok := s.fights[id]
 	if !ok {
 		return model.Fight{}, fmt.Errorf("fight with id %d not found", id)
 	}
 	return figh, nil
 }
-func (s *MemoryStore) UpdateFight(id int, f model.Fight) error {
+func (s *MemoryStore) UpdateFight(ctx context.Context, id int, f model.Fight) error {
 	_, ok := s.fights[id]
 	if !ok {
 		return fmt.Errorf("fight with id %d not found", id)
@@ -40,7 +41,7 @@ func (s *MemoryStore) UpdateFight(id int, f model.Fight) error {
 	s.fights[id] = f
 	return nil
 }
-func (s *MemoryStore) DeleteFight(id int) error {
+func (s *MemoryStore) DeleteFight(ctx context.Context, id int) error {
 	_, ok := s.fights[id]
 	if !ok {
 		return fmt.Errorf("fight with id %d not found", id)
@@ -48,7 +49,7 @@ func (s *MemoryStore) DeleteFight(id int) error {
 	delete(s.fights, id)
 	return nil
 }
-func (s *MemoryStore) ListFights() []model.Fight {
+func (s *MemoryStore) ListFights(ctx context.Context) []model.Fight {
 	result := make([]model.Fight, 0, len(s.fights))
 	for _, val := range s.fights {
 		result = append(result, val)

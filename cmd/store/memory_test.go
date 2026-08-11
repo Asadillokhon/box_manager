@@ -2,14 +2,15 @@ package store_test
 
 import (
 	"box-manager/cmd/model"
-	"box-manager/cmd/store"
+	"box-manager/cmd/store/memorystore"
+	"context"
 	"testing"
 	"time"
 )
 
 func TestCreateFighter_Success(t *testing.T) {
 	// Arrange: создаём хранилище и бойца для вставки
-	memStore := store.NewMemoryStore()
+	memStore := memorystore.NewMemoryStore()
 	input := model.Fighter{
 		FirstName: "Muhammad",
 		LastName:  "Ali",
@@ -19,7 +20,7 @@ func TestCreateFighter_Success(t *testing.T) {
 	}
 
 	// Act: вызываем CreateFighter
-	created, err := memStore.CreateFighter(input)
+	created, err := memStore.CreateFighter(context.Background(), input)
 
 	// Assert: ошибки быть не должно
 	if err != nil {
@@ -44,7 +45,7 @@ func TestCreateFighter_Success(t *testing.T) {
 	}
 
 	// Проверяем, что боец действительно сохранён в хранилище
-	retrieved, err := memStore.GetFighter(1)
+	retrieved, err := memStore.GetFighter(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("GetFighter failed: %v", err)
 	}
@@ -60,16 +61,16 @@ func TestCreateFighter_Success(t *testing.T) {
 }
 
 func TestCreateFighter_Multiple(t *testing.T) {
-	memStore := store.NewMemoryStore()
+	memStore := memorystore.NewMemoryStore()
 
 	f1 := model.Fighter{FirstName: "Mike", LastName: "Tyson"}
 	f2 := model.Fighter{FirstName: "Evander", LastName: "Holyfield"}
 
-	c1, err1 := memStore.CreateFighter(f1)
+	c1, err1 := memStore.CreateFighter(context.Background(), f1)
 	if err1 != nil {
 		t.Fatalf("unexpected error: %v", err1)
 	}
-	c2, err2 := memStore.CreateFighter(f2)
+	c2, err2 := memStore.CreateFighter(context.Background(), f2)
 	if err2 != nil {
 		t.Fatalf("unexpected error: %v", err2)
 	}

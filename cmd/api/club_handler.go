@@ -26,7 +26,7 @@ func (h *HTTPHandlers) CreateHTTPClub(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	created, err := h.store.CreateClub(club)
+	created, err := h.store.CreateClub(r.Context(), club)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -40,7 +40,7 @@ func (h *HTTPHandlers) GetHTTPClub(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, "undefined id parameter")
 		return
 	}
-	club, err := h.store.GetClub(id)
+	club, err := h.store.GetClub(r.Context(), id)
 	if err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -60,7 +60,7 @@ func (h *HTTPHandlers) UpdateHTTPClub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.UpdateClub(id, club); err != nil {
+	if err := h.store.UpdateClub(r.Context(), id, club); err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -74,13 +74,13 @@ func (h *HTTPHandlers) DeleteHTTPClub(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, "undefined id parameter")
 		return
 	}
-	if err := h.store.DeleteClub(id); err != nil {
+	if err := h.store.DeleteClub(r.Context(), id); err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
 func (h *HTTPHandlers) ListHttpClubs(w http.ResponseWriter, r *http.Request) {
-	clubs := h.store.ListClubs()
+	clubs := h.store.ListClubs(r.Context())
 	h.writeJSON(w, http.StatusOK, clubs)
 }

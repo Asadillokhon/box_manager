@@ -6,6 +6,7 @@ type FighterDTO struct {
 	BirthDate string  `json:"birth_date"` // "2006-01-02"
 	Weight    float64 `json:"weight"`
 	Category  string  `json:"category"`
+	ClubID    int     `json:"club_id"`
 }
 
 type TournamentDTO struct {
