@@ -54,6 +54,7 @@ func (h *HTTPHandlers) decodeAndValidateFighter(r *http.Request) (model.Fighter,
 		BirthDate: birthday,
 		Weight:    dto.Weight,
 		Category:  dto.Category,
+		ClubID:    dto.ClubID,
 	}, nil
 }
 func (h *HTTPHandlers) extractID(r *http.Request) (int, error) {
@@ -82,7 +83,7 @@ func (h *HTTPHandlers) CreateHTTPFighter(w http.ResponseWriter, r *http.Request)
 		h.writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	created, err := h.store.CreateFighter(fighter)
+	created, err := h.store.CreateFighter(r.Context(), fighter)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -102,7 +103,7 @@ func (h *HTTPHandlers) GetHTTPFighter(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, "undefined id parameter")
 		return
 	}
-	fighter, err := h.store.GetFighter(id)
+	fighter, err := h.store.GetFighter(r.Context(), id)
 	if err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -127,7 +128,7 @@ func (h *HTTPHandlers) UpdateHTTPFighter(w http.ResponseWriter, r *http.Request)
 		h.writeError(w, http.StatusBadRequest, "undefined id parameter")
 		return
 	}
-	err = h.store.UpdateFighter(id, fighter)
+	err = h.store.UpdateFighter(r.Context(), id, fighter)
 	if err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -141,7 +142,7 @@ func (h *HTTPHandlers) DeleteHTTPFighter(w http.ResponseWriter, r *http.Request)
 		h.writeError(w, http.StatusBadRequest, "invalid id parameter")
 		return
 	}
-	err = h.store.DeleteFighter(id)
+	err = h.store.DeleteFighter(r.Context(), id)
 	if err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -150,6 +151,6 @@ func (h *HTTPHandlers) DeleteHTTPFighter(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *HTTPHandlers) ListHTTPFighter(w http.ResponseWriter, r *http.Request) {
-	fighters := h.store.ListFighters()
+	fighters := h.store.ListFighters(r.Context())
 	h.writeJSON(w, http.StatusOK, fighters)
 }

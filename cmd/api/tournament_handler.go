@@ -41,7 +41,7 @@ func (h *HTTPHandlers) CreateHTTPTournament(w http.ResponseWriter, r *http.Reque
 		h.writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	tournament, err := h.store.CreateTournament(tour)
+	tournament, err := h.store.CreateTournament(r.Context(), tour)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -55,7 +55,7 @@ func (h *HTTPHandlers) GetHTTPTournament(w http.ResponseWriter, r *http.Request)
 		h.writeError(w, http.StatusBadRequest, "invalid id parameter")
 		return
 	}
-	tournament, err := h.store.GetTournament(id)
+	tournament, err := h.store.GetTournament(r.Context(), id)
 	if err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -73,7 +73,7 @@ func (h *HTTPHandlers) UpdateHTTPTournament(w http.ResponseWriter, r *http.Reque
 		h.writeError(w, http.StatusBadRequest, "invalid id parameter")
 		return
 	}
-	if err := h.store.UpdateTournament(id, tour); err != nil {
+	if err := h.store.UpdateTournament(r.Context(), id, tour); err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -86,7 +86,7 @@ func (h *HTTPHandlers) DeleteHTTPTournament(w http.ResponseWriter, r *http.Reque
 		h.writeError(w, http.StatusBadRequest, "invalid id parameter")
 		return
 	}
-	if err := h.store.DeleteTournament(id); err != nil {
+	if err := h.store.DeleteTournament(r.Context(), id); err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
@@ -94,7 +94,7 @@ func (h *HTTPHandlers) DeleteHTTPTournament(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *HTTPHandlers) ListHTTPTournament(w http.ResponseWriter, r *http.Request) {
-	tour := h.store.ListTournaments()
+	tour := h.store.ListTournaments(r.Context())
 	h.writeJSON(w, http.StatusOK, tour)
 }
 
@@ -110,7 +110,7 @@ func (h *HTTPHandlers) AddParticipantHTTPTournament(w http.ResponseWriter, r *ht
 		h.writeError(w, http.StatusBadRequest, "invalid id parameter")
 		return
 	}
-	if err := h.store.AddParticipantToTournament(id, dto.FighterID, dto.Place); err != nil {
+	if err := h.store.AddParticipantToTournament(r.Context(), id, dto.FighterID, dto.Place); err != nil {
 		h.writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -131,7 +131,7 @@ func (h *HTTPHandlers) RemoveParticipantHTTPTournament(w http.ResponseWriter, r 
 		return
 	}
 
-	if err := h.store.RemoveParticipantFromTournament(tournamentID, fighterID); err != nil {
+	if err := h.store.RemoveParticipantFromTournament(r.Context(), tournamentID, fighterID); err != nil {
 		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
