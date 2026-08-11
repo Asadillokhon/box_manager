@@ -1,0 +1,1 @@
+ALTER TABLE fighters ADD CONSTRAINT unique_fighter UNIQUE (first_name, last_name, birth_date);

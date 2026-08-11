@@ -1,0 +1,1 @@
+ALTER TABLE fighters DROP CONSTRAINT unique_fighter;
