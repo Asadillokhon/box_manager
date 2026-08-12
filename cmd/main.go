@@ -6,12 +6,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 )
 
 func main() {
+	// migrate create -ext sql -dir cmd/migrations -seq title_table
 
 	ctx := context.Background()
-	dsn := "postgres://postgres:post@localhost:5432/boxmanager?sslmode=disable"
+	dsn := os.Getenv("CONN_STRING")
 	pgStore, err := pgstore.NewPostgresStore(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Ошибка подключения к БД: %v", err)
