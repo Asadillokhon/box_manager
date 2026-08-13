@@ -9,13 +9,89 @@ import (
 )
 
 func (s *PostgresStore) UpdateFight(ctx context.Context, id int, f model.Fight) error {
+	queryFight := `
+		UPDATE fights 
+		SET fighter1_id = $1, fighter2_id = $2, result = $3 
+		WHERE id = $4
+	`
+	tag, err := s.db.Exec(ctx, queryFight, f.Fighter1ID, f.Fighter2ID, f.Result, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("fight with id %d not found", id)
+	}
+
+	_, err = s.db.Exec(ctx, `DELETE FROM fight_rounds WHERE fight_id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("failed to clear old rounds: %w", err)
+	}
+
+	for i, round := range f.Rounds {
+		queryRound := `
+			INSERT INTO fight_rounds (fight_id, round_number, fighter1_score, fighter2_score) 
+			VALUES ($1, $2, $3, $4)
+		`
+		_, err := s.db.Exec(ctx, queryRound, id, i+1, round.Fighter1Score, round.Fighter2Score)
+		if err != nil {
+			return fmt.Errorf("failed to update round %d: %w", i+1, err)
+		}
+	}
+
 	return nil
 }
 func (s *PostgresStore) DeleteFight(ctx context.Context, id int) error {
+	query := `DELETE FROM fights WHERE id = $1`
+	tag, err := s.db.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("fight with id %d not found", id)
+	}
 	return nil
 }
 func (s *PostgresStore) ListFights(ctx context.Context) []model.Fight {
-	return []model.Fight{}
+	rows, err := s.db.Query(ctx, `SELECT id, fighter1_id, fighter2_id, result FROM fights ORDER BY id`)
+	if err != nil {
+		return []model.Fight{}
+	}
+	defer rows.Close()
+
+	var fights []model.Fight
+	for rows.Next() {
+		var f model.Fight
+		if err := rows.Scan(&f.ID, &f.Fighter1ID, &f.Fighter2ID, &f.Result); err != nil {
+			continue // пропускаем бой с ошибкой сканирования
+		}
+		fights = append(fights, f)
+	}
+
+	// 2. Для каждого боя подгружаем его раунды (N+1 запрос - нормально для старта)
+	for i := range fights {
+		roundRows, err := s.db.Query(ctx, `
+			SELECT round_number, fighter1_score, fighter2_score 
+			FROM fight_rounds 
+			WHERE fight_id = $1 
+			ORDER BY round_number
+		`, fights[i].ID)
+		if err != nil {
+			continue
+		}
+		defer roundRows.Close() // Будет вызвано после завершения функции
+
+		var rounds []model.RoundsScore
+		for roundRows.Next() {
+			var r model.RoundsScore
+			var roundNum int
+			if err := roundRows.Scan(&roundNum, &r.Fighter1Score, &r.Fighter2Score); err == nil {
+				rounds = append(rounds, r)
+			}
+		}
+		fights[i].Rounds = rounds
+	}
+
+	return fights
 }
 
 func (s *PostgresStore) CreateFight(ctx context.Context, f model.Fight) (model.Fight, error) {
